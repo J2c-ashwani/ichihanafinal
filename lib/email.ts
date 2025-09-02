@@ -1,23 +1,28 @@
-import { Resend } from "resend"
+// lib/email.ts
+import { Resend } from "resend";
 
 interface ContactFormData {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  destination: string
-  studyLevel: string
-  fieldOfStudy: string
-  message: string
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  destination: string;
+  studyLevel: string;
+  fieldOfStudy: string;
+  message: string;
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendContactEmail(data: ContactFormData) {
   try {
-    // Send email to consultancy
-    await resend.emails.send({
-      from: "noreply@ichihanachitwan.com",
+    // TEMP: Use a verified email in Resend for testing
+    const verifiedSender = "Ichihana.chitwan2025@gmail.com";
+
+    // 1️⃣ Send email to consultancy
+    const consultancyResponse = await resend.emails.send({
+      from: verifiedSender,
       to: ["Ichihana.chitwan2025@gmail.com"], // your receiving email
       subject: `New Contact Form Submission from ${data.firstName} ${data.lastName}`,
       html: `
@@ -30,11 +35,12 @@ export async function sendContactEmail(data: ContactFormData) {
         <p><strong>Field of Study:</strong> ${data.fieldOfStudy}</p>
         <p><strong>Message:</strong> ${data.message}</p>
       `,
-    })
+    });
+    console.log("Consultancy email response:", consultancyResponse);
 
-    // Send confirmation email to student
-    await resend.emails.send({
-      from: "noreply@ichihanachitwan.com",
+    // 2️⃣ Send confirmation email to student
+    const studentResponse = await resend.emails.send({
+      from: verifiedSender,
       to: [data.email],
       subject: "Thank you for contacting Ichi Hana Chitwan Consultancy",
       html: `
@@ -44,11 +50,12 @@ export async function sendContactEmail(data: ContactFormData) {
         Our team will review your information and contact you within 24 hours.</p>
         <p>Best regards,<br>Ichi Hana Chitwan Consultancy Team</p>
       `,
-    })
+    });
+    console.log("Student email response:", studentResponse);
 
-    return { success: true }
+    return { success: true };
   } catch (error) {
-    console.error("Error sending email:", error)
-    return { success: false, error }
+    console.error("Error sending emails via Resend:", error);
+    return { success: false, error };
   }
 }
