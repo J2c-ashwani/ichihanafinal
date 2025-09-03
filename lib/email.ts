@@ -12,18 +12,20 @@ interface ContactFormData {
   message: string;
 }
 
-// Initialize Resend client
+// ✅ Initialize Resend client, ensure API key is loaded
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("RESEND_API_KEY is missing. Check your .env.local or Vercel environment variables.");
+}
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendContactEmail(data: ContactFormData) {
   try {
-    // TEMP: Use a verified email in Resend for testing
-    const verifiedSender = "Ichihana.chitwan2025@gmail.com";
+    const verifiedSender = "Ichihana.chitwan2025@gmail.com"; // must be verified in Resend
 
-    // 1️⃣ Send email to consultancy
+    // 1️⃣ Email to consultancy
     const consultancyResponse = await resend.emails.send({
       from: verifiedSender,
-      to: ["Ichihana.chitwan2025@gmail.com"], // your receiving email
+      to: ["Ichihana.chitwan2025@gmail.com"],
       subject: `New Contact Form Submission from ${data.firstName} ${data.lastName}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -38,7 +40,7 @@ export async function sendContactEmail(data: ContactFormData) {
     });
     console.log("Consultancy email response:", consultancyResponse);
 
-    // 2️⃣ Send confirmation email to student
+    // 2️⃣ Confirmation email to student
     const studentResponse = await resend.emails.send({
       from: verifiedSender,
       to: [data.email],
